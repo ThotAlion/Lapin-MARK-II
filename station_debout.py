@@ -3,11 +3,13 @@
 
 import pypot.robot
 import time
+import json
 import math
 import sys
 import threading
 import time
 import queue
+from serial import Serial
  
 def dist(a,b):
     return math.sqrt((a*a)+(b*b))
@@ -61,6 +63,10 @@ def MGD(theta2):
 
 lapin = pypot.robot.from_json('confLapinMarkII.json')
 
+PS = Serial('/dev/ttyAMA0',115200,timeout=0.1)
+PS.flushInput()
+info = {}
+
 alpha = 0  # positif quand on ecarte
 theta = 0  # negatif vers l'avant
 aLc = 0  # repos à -40, extension à 30
@@ -103,15 +109,25 @@ while True:
     # mesure de l'angle quadrilatere
     aLm = interpInv(lapin.l_knee_y.present_position, -40, 30)
     aRm = interpInv(lapin.r_knee_y.present_position, -40, 30)
+    # recuperation des capteurs
+    PS.write(b"A")
+    out = PS.readline()
+    try:
+        info = json.loads(out)
+    except:
+        pass
 
     print(str(temp)+'°C\t'+str(state))
+    print(lapin.l_ankle_y.present_position)
+    print(info["RF"])
+    print(info["RB"])
 
     # machine a etat
     if state == 0:
-        alpha = 20
+        alpha = 10
         theta = 0
-        aLc = 0.7
-        aRc = 0.7
+        aLc = 0.8
+        aRc = 0.8
         speed = 10
         compliant = False
 
@@ -155,16 +171,16 @@ while True:
     lapin.l_knee_y.goal_position = interp(aLc, -40, 30)
     lapin.l_knee_y.moving_speed = speed
     
-    lapin.r_ankle_y.compliant = True#compliant
+    lapin.r_ankle_y.compliant = compliant
     lapin.r_ankle_y.goal_position = aFr-lFr-2
     lapin.r_ankle_y.moving_speed = speed
     
-    lapin.l_ankle_y.compliant = True#compliant
+    lapin.l_ankle_y.compliant = compliant
     lapin.l_ankle_y.goal_position = aFl-lFl-2
     lapin.l_ankle_y.moving_speed = speed
 
     time.sleep(0.005)
 for mot in lapin.motors:
     mot.compliant = True
-time.sleep(0.5)
+time.sleep(0.04)
 lapin.close()
