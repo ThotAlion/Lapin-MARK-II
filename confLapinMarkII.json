@@ -33,14 +33,14 @@
 			"angle_limit": [-90,90]
 		},
         "l_ankle_y": {
-			"id": 5,
-			"type": "AX-12",
+			"id": 15,
+			"type": "MX-28",
 			"orientation": "direct",
 			"offset": 0,
 			"angle_limit": [-90,90]
 		},
 		"r_hip_x": {
-			"id": 18,
+			"id": 22,
 			"type": "MX-28",
 			"orientation": "indirect",
 			"offset": 0,
@@ -54,15 +54,15 @@
 			"angle_limit": [-90,90]
 		},
 		"r_knee_y": {
-			"id": 3,
+			"id": 16,
 			"type": "MX-64",
 			"orientation": "indirect",
 			"offset": 0,
 			"angle_limit": [-90,90]
 		},
         "r_ankle_y": {
-			"id": 17,
-			"type": "AX-12",
+			"id": 29,
+			"type": "MX-28",
 			"orientation": "indirect",
 			"offset": 0,
 			"angle_limit": [-90,90]
