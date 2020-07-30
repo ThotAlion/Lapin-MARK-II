@@ -119,17 +119,81 @@ while True:
 
     print(str(temp)+'°C\t'+str(state))
     print(lapin.l_ankle_y.present_position)
-    print(info["RF"])
-    print(info["RB"])
+    if info["RF"]["F"]+info["RB"]["F"]+info["LF"]["F"]+info["LB"]["F"]>80:
+        rbalance = (info["RF"]["F"]+info["RB"]["F"])/(info["RF"]["F"]+info["RB"]["F"]+info["LF"]["F"]+info["LB"]["F"])
+        onGround = True
+    else:
+        rbalance=0.5
+        onGround = False
+    roll = info["GYR"]["X"]
+    print("rbalance: "+str(rbalance))
+    print("roll rate: "+str(roll))
+
+    rollRateThr = 50
+    ecart = 20
 
     # machine a etat
     if state == 0:
-        alpha = 10
+        alpha = ecart
+        theta = 0
+        aLc = 0.9
+        aRc = 0.9
+        speed = 10
+        compliant = False
+        if time.time()-t0 > 10:
+            t0 = time.time()
+            state = 1
+
+    elif state == 1:
+        alpha = ecart
+        theta = 0
+        aLc = 0.9
+        aRc = 0.8
+        speed = 3
+        compliant = False
+        if time.time()-t0 > 10:
+            t0 = time.time()
+            state = 2
+
+    elif state == 2:
+        alpha = ecart
+        theta = 0
+        aLc = 0.6
+        aRc = 0.8
+        speed = 100
+        compliant = False
+        if roll < -rollRateThr:
+            state = 3
+
+    elif state == 3:
+        alpha = ecart
         theta = 0
         aLc = 0.8
         aRc = 0.8
-        speed = 10
+        speed = 100
         compliant = False
+        if rbalance<0.2 and onGround:
+            state = 4
+
+    elif state == 4:
+        alpha = ecart
+        theta = 0
+        aLc = 0.8
+        aRc = 0.6
+        speed = 100
+        compliant = False
+        if roll > rollRateThr:
+            state = 5
+    
+    elif state == 5:
+        alpha = ecart
+        theta = 0
+        aLc = 0.8
+        aRc = 0.8
+        speed = 100
+        compliant = False
+        if rbalance>0.8 and onGround:
+            state = 2
 
     elif state == -1:
         alpha = 0
@@ -138,6 +202,8 @@ while True:
         aRc = 0.5
         speed = 10
         compliant = True
+    
+    
 
 
     # actionneurs
@@ -172,11 +238,11 @@ while True:
     lapin.l_knee_y.moving_speed = speed
     
     lapin.r_ankle_y.compliant = compliant
-    lapin.r_ankle_y.goal_position = aFr-lFr-4
+    lapin.r_ankle_y.goal_position = aFr-lFr-0
     lapin.r_ankle_y.moving_speed = speed
     
     lapin.l_ankle_y.compliant = compliant
-    lapin.l_ankle_y.goal_position = aFl-lFl-4
+    lapin.l_ankle_y.goal_position = aFl-lFl-0
     lapin.l_ankle_y.moving_speed = speed
 
     time.sleep(0.005)
