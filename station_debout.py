@@ -38,14 +38,14 @@ def interpInv(x, x1, x2):
 def MGD(theta2):
     c = math.cos(theta2)
     s = math.sin(theta2)
-    xA = 0.025
-    yA = 0.045
-    xB = 0.095
+    xA = 0.0
+    yA = 0.047
+    xB = 0.094
     yB = 0.000
-    L2 = 0.130
-    L3 = 0.055
-    L4 = 0.122
-    L5 = 0.140
+    L2 = 0.13350
+    L3 = 0.10522
+    L4 = 0.13269
+    L5 = 0.13287
     xC = xB+L2*c
     yC = yB+L2*s
     AC = math.sqrt((xA-xC)**2+(yA-yC)**2)
@@ -61,9 +61,9 @@ def MGD(theta2):
     return math.atan((yF-yC)/(xF-xC))*180.0/math.pi, math.atan(yF/xF)*180.0/math.pi
 
 
-lapin = pypot.robot.from_json('confLapinMarkII.json')
+lapin = pypot.robot.from_json('confLapinMarkIII.json')
 
-PS = Serial('/dev/ttyAMA0',115200,timeout=0.1)
+PS = Serial('/dev/serial0',115200,timeout=0.1)
 PS.flushInput()
 info = {}
 
@@ -71,6 +71,7 @@ alpha = 0  # positif quand on ecarte
 theta = 0  # negatif vers l'avant
 aLc = 0  # repos à -40, extension à 30
 aRc = 0  # repos à -40, extension à 30
+ankleOffset = 5
 compliant = True
 speed = 100
 state = 0
@@ -119,8 +120,7 @@ while True:
 
     print(str(temp)+'°C\t'+str(state))
     print(lapin.l_ankle_y.present_position)
-    print(info["RF"])
-    print(info["RB"])
+    print(info)
 
     # machine a etat
     if state == 0:
@@ -128,7 +128,7 @@ while True:
         theta = 0
         aLc = 0.8
         aRc = 0.8
-        speed = 10
+        speed = 5
         compliant = False
 
     elif state == -1:
@@ -141,8 +141,8 @@ while True:
 
 
     # actionneurs
-    (aFr,lFr) = MGD((70-lapin.r_knee_y.present_position)*math.pi/180.0)
-    (aFl,lFl) = MGD((70-lapin.l_knee_y.present_position)*math.pi/180.0)
+    (aFr,lFr) = MGD((90-lapin.r_knee_y.present_position)*math.pi/180.0)
+    (aFl,lFl) = MGD((90-lapin.l_knee_y.present_position)*math.pi/180.0)
     lapin.r_hip_x.pid = (KP,KI,0)
     lapin.r_hip_x.compliant = compliant
     lapin.r_hip_x.goal_position = alpha/2
@@ -154,30 +154,34 @@ while True:
     lapin.l_hip_x.moving_speed = speed
     
     lapin.r_hip_y.compliant = compliant
-    lapin.r_hip_y.goal_position = -lFr-theta/2
-    lapin.r_hip_y.moving_speed = 0
+    lapin.r_hip_y.goal_position = 0-theta/2
+    lapin.r_hip_y.moving_speed = speed
     
     lapin.l_hip_y.compliant = compliant
-    lapin.l_hip_y.goal_position = -lFl+theta/2
+    lapin.l_hip_y.goal_position = 0+theta/2
     lapin.l_hip_y.moving_speed = speed
     
     lapin.r_knee_y.pid = (KP,KI,0)
     lapin.r_knee_y.compliant = compliant
-    lapin.r_knee_y.goal_position = interp(aRc, -40, 30)
+    lapin.r_knee_y.goal_position = interp(aRc, -23, 90)
     lapin.r_knee_y.moving_speed = speed
     
     lapin.l_knee_y.pid = (KP,KI,0)
     lapin.l_knee_y.compliant = compliant
-    lapin.l_knee_y.goal_position = interp(aLc, -40, 30)
+    lapin.l_knee_y.goal_position = interp(aLc, -23, 90)
     lapin.l_knee_y.moving_speed = speed
     
     lapin.r_ankle_y.compliant = compliant
-    lapin.r_ankle_y.goal_position = aFr-lFr-4
+    lapin.r_ankle_y.goal_position = aFr-lFr+ankleOffset
     lapin.r_ankle_y.moving_speed = speed
     
     lapin.l_ankle_y.compliant = compliant
-    lapin.l_ankle_y.goal_position = aFl-lFl-4
+    lapin.l_ankle_y.goal_position = aFl-lFl+ankleOffset
     lapin.l_ankle_y.moving_speed = speed
+
+    # print("left")
+    # print(lapin.l_knee_y.present_position)
+    # print(lapin.l_ankle_y.goal_position)
 
     time.sleep(0.005)
 for mot in lapin.motors:

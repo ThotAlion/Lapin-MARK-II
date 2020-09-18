@@ -127,71 +127,29 @@ while True:
     print("rbalance: "+str(rbalance))
     print("roll rate: "+str(roll))
 
-    rollRateThr = 50
     ecart = 10
+    avan = 20
 
     # machine a etat
     if state == 0:
         alpha = ecart
-        theta = 0
+        theta = avan
         aLc = 0.9
         aRc = 0.9
-        speed = 10
+        speed = 100
         compliant = False
-        if time.time()-t0 > 10:
-            t0 = time.time()
+        if rbalance>0.5:
             state = 1
 
     elif state == 1:
         alpha = ecart
-        theta = 0
+        theta = -avan
         aLc = 0.9
-        aRc = 0.8
-        speed = 3
-        compliant = False
-        if time.time()-t0 > 10:
-            t0 = time.time()
-            state = 2
-
-    elif state == 2:
-        alpha = ecart
-        theta = 0
-        aLc = 0.6
-        aRc = 0.8
+        aRc = 0.9
         speed = 100
         compliant = False
-        if roll < -rollRateThr:
-            state = 3
-
-    elif state == 3:
-        alpha = ecart
-        theta = 0
-        aLc = 0.8
-        aRc = 0.8
-        speed = 100
-        compliant = False
-        if rbalance<0.2 and onGround:
-            state = 4
-
-    elif state == 4:
-        alpha = ecart
-        theta = 0
-        aLc = 0.8
-        aRc = 0.6
-        speed = 100
-        compliant = False
-        if roll > rollRateThr:
-            state = 5
-    
-    elif state == 5:
-        alpha = ecart
-        theta = 0
-        aLc = 0.8
-        aRc = 0.8
-        speed = 100
-        compliant = False
-        if rbalance>0.8 and onGround:
-            state = 2
+        if rbalance<0.5:
+            state = 0
 
     elif state == -1:
         alpha = 0
@@ -235,11 +193,11 @@ while True:
     lapin.l_knee_y.goal_position = interp(aLc, -23, 90)
     lapin.l_knee_y.moving_speed = speed
     
-    lapin.r_ankle_y.compliant = compliant
+    lapin.r_ankle_y.compliant = True#compliant
     lapin.r_ankle_y.goal_position = aFr-lFr+ankleOffset
     lapin.r_ankle_y.moving_speed = speed
     
-    lapin.l_ankle_y.compliant = compliant
+    lapin.l_ankle_y.compliant = True#compliant
     lapin.l_ankle_y.goal_position = aFl-lFl+ankleOffset
     lapin.l_ankle_y.moving_speed = speed
 
