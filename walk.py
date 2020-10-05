@@ -123,7 +123,7 @@ while True:
     else:
         rbalance=0.5
         onGround = False
-    roll = 0.0#info["GYR"]["X"]
+    roll = info["GYR"]["X"]
     print("rbalance: "+str(rbalance))
     print("roll rate: "+str(roll))
 
