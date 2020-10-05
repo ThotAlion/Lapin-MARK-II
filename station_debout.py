@@ -119,7 +119,7 @@ while True:
         pass
 
     print(str(temp)+'°C\t'+str(state))
-    print(lapin.l_ankle_y.present_position)
+    #print(lapin.l_ankle_y.present_position)
     print(info)
 
     # machine a etat
@@ -171,11 +171,11 @@ while True:
     lapin.l_knee_y.goal_position = interp(aLc, -23, 90)
     lapin.l_knee_y.moving_speed = speed
     
-    lapin.r_ankle_y.compliant = compliant
+    lapin.r_ankle_y.compliant = True
     lapin.r_ankle_y.goal_position = aFr-lFr+ankleOffset
     lapin.r_ankle_y.moving_speed = speed
     
-    lapin.l_ankle_y.compliant = compliant
+    lapin.l_ankle_y.compliant = True
     lapin.l_ankle_y.goal_position = aFl-lFl+ankleOffset
     lapin.l_ankle_y.moving_speed = speed
 
